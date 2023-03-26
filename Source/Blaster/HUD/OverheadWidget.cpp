@@ -35,8 +35,20 @@ void UOverheadWidget::ShowPlayerNetRole(APawn* InPawn)
 	SetDisplayText(RemoteRoleString);
 }
 
+// THE BELOW WAS REMOVED AS IT NO LONGER EXISTS IN UE 5.1	
+/*
 void UOverheadWidget::OnLevelRemovedFromWorld(ULevel* InLevel, UWorld* InWorld)
 {
 	RemoveFromParent();
 	Super::OnLevelRemovedFromWorld(InLevel, InWorld);
 }
+*/
+
+// REPLACED WITH...
+void UOverheadWidget::NativeDestruct()
+{
+	//MenuTearDown();
+	RemoveFromParent();
+	Super::NativeDestruct();
+}
+

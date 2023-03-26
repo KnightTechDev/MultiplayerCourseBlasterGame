@@ -23,6 +23,11 @@ public:
 	void ShowPlayerNetRole(APawn* InPawn);
 
 protected:
-	virtual void OnLevelRemovedFromWorld(ULevel* InLevel, UWorld* InWorld) override;
+
+	// THE BELOW WAS REMOVED AS IT NO LONGER EXISTS IN UE 5.1	
+	//virtual void OnLevelRemovedFromWorld(ULevel* InLevel, UWorld* InWorld) override;
+	
+	// REPLACED WITH...
+	virtual void NativeDestruct() override;
 
 };

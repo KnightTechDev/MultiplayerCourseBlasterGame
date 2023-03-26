@@ -8,7 +8,6 @@
 void ALobbyGameMode::PostLogin(APlayerController* NewPlayer)
 {
 	Super::PostLogin(NewPlayer);
-
 	int32 NumberOfPlayers = GameState.Get()->PlayerArray.Num();
 
 	UGameInstance* GameInstance = GetGameInstance();
@@ -17,14 +16,14 @@ void ALobbyGameMode::PostLogin(APlayerController* NewPlayer)
 		UMultiplayerSessionsSubsystem* Subsystem = GameInstance->GetSubsystem<UMultiplayerSessionsSubsystem>();
 		check(Subsystem);
 
-		if (NumberOfPlayers == Subsystem->DesiredNumPublicConnections)
+		if (NumberOfPlayers == Subsystem->LastNumPublicConnections)
 		{
 			UWorld* World = GetWorld();
 			if (World)
 			{
 				bUseSeamlessTravel = true;
 
-				FString MatchType = Subsystem->DesiredMatchType;
+				FString MatchType = Subsystem->LastMatchType;
 				if (MatchType == "FreeForAll")
 				{
 					World->ServerTravel(FString("/Game/Maps/BlasterMap?listen"));

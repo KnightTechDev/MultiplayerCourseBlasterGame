@@ -21,45 +21,96 @@ UMultiplayerSessionsSubsystem::UMultiplayerSessionsSubsystem():
 
 void UMultiplayerSessionsSubsystem::CreateSession(int32 NumPublicConnections, FString MatchType)
 {
-	DesiredNumPublicConnections = NumPublicConnections;
-	DesiredMatchType = MatchType;
+	UE_LOG(LogTemp, Warning, TEXT("STEP 1: CHECKING SESSION INTERFACE IS VALID..."));
+
 	if (!SessionInterface.IsValid())
 	{
+		UE_LOG(LogTemp, Warning, TEXT("[ERROR] SESSION INTERFACE IS NOT VALID!!!"));
 		return;
 	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("SESSION INTERFACE IS VALID..."));
+	}
+
+	UE_LOG(LogTemp, Warning, TEXT("STEP 2: CHECKING FOR EXISTING SESSIONS..."));
 
 	auto ExistingSession = SessionInterface->GetNamedSession(NAME_GameSession);
 	if (ExistingSession != nullptr)
 	{
+		UE_LOG(LogTemp, Warning, TEXT("[WARNING!] EXISTING SESSION WAS FOUND DESTROYING SESSION!!!"));
+
 		bCreateSessionOnDestroy = true;
 		LastNumPublicConnections = NumPublicConnections;
 		LastMatchType = MatchType;
 
 		DestroySession();
 	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("NO EXISTING SESSIONS FOUND..."));
+	}
+
+	UE_LOG(LogTemp, Warning, TEXT("STEP 3: GETTING SESSION HANDLE..."));
 
 	// Store the delegate in a FDelegateHandle so we can later remove it from the delegate list
 	CreateSessionCompleteDelegateHandle = SessionInterface->AddOnCreateSessionCompleteDelegate_Handle(CreateSessionCompleteDelegate);
 
+	UE_LOG(LogTemp, Warning, TEXT("STEP 4: MAKING LAST SESSION SETTINGS..."));
+
 	LastSessionSettings = MakeShareable(new FOnlineSessionSettings());
-	LastSessionSettings->bIsLANMatch = IOnlineSubsystem::Get()->GetSubsystemName() == "NULL" ? true : false;
-	LastSessionSettings->NumPublicConnections = NumPublicConnections;
-	LastSessionSettings->bAllowJoinInProgress = true;
-	LastSessionSettings->bAllowJoinViaPresence = true;
-	LastSessionSettings->bShouldAdvertise = true;
-	LastSessionSettings->bUsesPresence = true;
-	LastSessionSettings->Set(FName("MatchType"), MatchType, EOnlineDataAdvertisementType::ViaOnlineServiceAndPing);
-	LastSessionSettings->BuildUniqueId = 1;
-	LastSessionSettings->bUseLobbiesIfAvailable = true;
+	if (LastSessionSettings)
+	{
+		
+		LastSessionSettings->bIsLANMatch = IOnlineSubsystem::Get()->GetSubsystemName() == "NULL" ? true : false;
+		LastSessionSettings->NumPublicConnections = NumPublicConnections;
+		LastSessionSettings->bAllowJoinInProgress = true;
+		LastSessionSettings->bAllowJoinViaPresence = true;
+		LastSessionSettings->bShouldAdvertise = true;
+		LastSessionSettings->bUsesPresence = true;
+		LastSessionSettings->Set(FName("MatchType"), MatchType, EOnlineDataAdvertisementType::ViaOnlineServiceAndPing);
+		LastSessionSettings->BuildUniqueId = 1;
+		LastSessionSettings->bUseLobbiesIfAvailable = true;
+		
+
+		UE_LOG(LogTemp, Warning, TEXT("SESSION SETTINGS GOOD!"));
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("[ERROR] SESSION SETTINGS VARIABLE COULD NOT BE CREATED!!!"));
+	}
+
+	UE_LOG(LogTemp, Warning, TEXT("STEP 5: GETTING LOCAL PLAYER..."));
 
 	const ULocalPlayer* LocalPlayer = GetWorld()->GetFirstLocalPlayerFromController();
-	if (!SessionInterface->CreateSession(*LocalPlayer->GetPreferredUniqueNetId(), NAME_GameSession, *LastSessionSettings))
+	if (LocalPlayer)
 	{
+		UE_LOG(LogTemp, Warning, TEXT("LOCAL PLAYER VARIABLE GOOD."));
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("[ERROR] LOCAL PLAYER COULD NOT BE CREATED..."));
+	}
+
+	UE_LOG(LogTemp, Warning, TEXT("STEP 6: ATTEMPTING TO CREATE A SESSION..."));
+
+	// THIS METHOD DOES NOT WORK. MUST LOGIN FIRST OR LOGIN BY CREATEID!!!
+	//bool bSessionCreationResult = SessionInterface->CreateSession(*LocalPlayer->GetPreferredUniqueNetId(), NAME_GameSession, *LastSessionSettings);
+	bool bSessionCreationResult = SessionInterface->CreateSession(*LocalPlayer->GetPreferredUniqueNetId(), NAME_GameSession, *LastSessionSettings);
+	if (bSessionCreationResult != true)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("SESSION COULDN'T BE CREATED..."));
+
 		SessionInterface->ClearOnCreateSessionCompleteDelegate_Handle(CreateSessionCompleteDelegateHandle);
 
 		// Broadcast our own custom delegate
 		MultiplayerOnCreateSessionComplete.Broadcast(false);
 	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("SESSION CREATED!"));
+	}
+	
 }
 
 void UMultiplayerSessionsSubsystem::FindSessions(int32 MaxSearchResults)
@@ -127,6 +178,8 @@ void UMultiplayerSessionsSubsystem::StartSession()
 
 void UMultiplayerSessionsSubsystem::OnCreateSessionComplete(FName SessionName, bool bWasSuccessful)
 {
+	UE_LOG(LogTemp, Warning, TEXT("OnCreateSessionComplete FIRED!"));
+	
 	if (SessionInterface)
 	{
 		SessionInterface->ClearOnCreateSessionCompleteDelegate_Handle(CreateSessionCompleteDelegateHandle);

@@ -45,8 +45,17 @@ public:
 	FMultiplayerOnDestroySessionComplete MultiplayerOnDestroySessionComplete;
 	FMultiplayerOnStartSessionComplete MultiplayerOnStartSessionComplete;
 
-	int32 DesiredNumPublicConnections{};
-	FString DesiredMatchType{};
+	// VARIABLES
+
+	// NOTE: THESE MAY CAUSE A PROBLEM, CHECK THE LOBBY CODE AND OTHERS TO BE SURE.
+	//int32 DesiredNumPublicConnections{};
+	//FString DesiredMatchType{};
+
+	// NOTE: THESE MAY CAUSE A PROBLEM, CHECK THE LOBBY CODE AND OTHERS TO BE SURE.
+	int32 LastNumPublicConnections;
+	FString LastMatchType;
+
+
 protected:
 
 	//
@@ -80,6 +89,5 @@ private:
 	FDelegateHandle StartSessionCompleteDelegateHandle;
 
 	bool bCreateSessionOnDestroy{ false };
-	int32 LastNumPublicConnections;
-	FString LastMatchType;
+
 };
